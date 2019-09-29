@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/107/three.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/oimo/1.0.9/oimo.min.js"></script>
+        <script src="./game.js"></script>
+        <script src="./game_renderer.js"></script>
+        <script src="./game_controller.js"></script>
+        <script src="./game_networking.js"></script>
+        <script src="./core.js"></script>
+    </head>
+    <body>
+        <script>
+            let ip = window.location.hostname;
+            let port = 34851;
+            let name = "glowstick";
+            if (window.location.search) {
+                let args = window.location.search.split("?")[1].split("&").map(x => x.split("=")).filter(x => x.length == 2).reduce((a, b) => (a[b[0]] = b[1], a), {});
+                if (args.name) {
+                    name = args.name;
+                }
+            }
+            start_game(ip + ":" + port, name);
+        </script>
+    </body>
+</html>
