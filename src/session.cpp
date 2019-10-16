@@ -19,7 +19,7 @@ session_t::session_t(boost::asio::io_context& io, core_t& core, boost::asio::ip:
 	m_strand(io),
     m_core(core),
     m_ws(std::move(socket)),
-    m_id(0),
+    m_player(0),
     m_connected(false)
 {
 }
@@ -41,7 +41,7 @@ void session_t::process_message(const rapidjson::Value& json) {
     message::in::type type = get_message_type(json);
     const auto& data = json["data"];
     auto this_ptr = shared_from_this();
-    if (!m_id && type == message::in::type::login) {
+    if (!m_player && type == message::in::type::login) {
         m_core.on_message(this_ptr, message::in::login_t(data));
     } else switch (type) {
     	PROCESS_MESSAGES
@@ -104,19 +104,18 @@ void session_t::send_message(std::shared_ptr<message::out::message_t> message) {
 	auto this_ptr = shared_from_this();
 	m_strand.post([this_ptr, message]() {
 		this_ptr->m_messages_queue.push_back(message);
-		if (this_ptr->m_messages_queue.size() > 1) {
-			return;
+		if (this_ptr->m_messages_queue.size() == 1) {
+			this_ptr->do_write();
 		}
-		this_ptr->do_write();
 	});
 }
 
-int session_t::get_id() const {
-    return m_id;
+int session_t::get_player() const {
+    return m_player;
 }
 
-void session_t::set_id(int id) {
-    m_id = id;
+void session_t::set_player(int id) {
+    m_player = id;
 }
 
 void session_t::run() {

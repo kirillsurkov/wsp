@@ -20,7 +20,7 @@ private:
 
     std::string m_write_buffer;
 
-    int m_id;
+    int m_player;
 
     std::atomic<bool> m_connected;
 
@@ -38,8 +38,8 @@ public:
 
     void send_message(std::shared_ptr<message::out::message_t> message);
 
-    int get_id() const;
-    void set_id(int id);
+    int get_player() const;
+    void set_player(int id);
 
     void run();
 };
