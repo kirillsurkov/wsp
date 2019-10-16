@@ -9,9 +9,9 @@ class session_t;
 class game_object_t;
 class core_t {
 private:
-	physics_t& m_physics;
+    physics_t& m_physics;
 
-	id_manager_t m_objects_id_manager;
+    id_manager_t m_objects_id_manager;
     id_manager_t m_physics_id_manager;
     id_manager_t m_players_id_manager;
 

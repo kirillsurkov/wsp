@@ -4,7 +4,7 @@
 
 class player_t : public physics_object_t {
 private:
-	int m_player_id;
+    int m_player_id;
     std::string m_name;
 
 public:

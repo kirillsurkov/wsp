@@ -9,8 +9,8 @@
 class core_t;
 class session_t : public std::enable_shared_from_this<session_t> {
 private:
-	boost::asio::io_context& m_io;
-	boost::asio::io_context::strand m_strand;
+    boost::asio::io_context& m_io;
+    boost::asio::io_context::strand m_strand;
 
     core_t& m_core;
 

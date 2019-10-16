@@ -5,10 +5,10 @@
 
 namespace message::out {
     enum class type {
-    	login = 1,
+        login = 1,
         chat_local,
         chat_global,
-		new_physics_object,
+        new_physics_object,
         physics_state
     };
 
