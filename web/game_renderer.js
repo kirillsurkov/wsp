@@ -28,29 +28,31 @@ function GameRenderer(game, width, height) {
             for (id in game.objects) {
                 let obj = game.objects[id];
                 if (!meshes[id]) {
-                    let geometry = null;
-                    switch (game.objects[id].type) {
-                        case "box": {
-                            geometry = new THREE.BoxGeometry(obj.size[0], obj.size[1], obj.size[2]);
-                            break;
+                    let geometry = new THREE.Geometry();
+                    for (let shape of obj.shapes) {
+                        let geom = null;
+                        switch (shape.type) {
+                            case "box": {
+                                geom = new THREE.BoxGeometry(shape.size[0], shape.size[1], shape.size[2]);
+                                break;
+                            }
+                            case "sphere": {
+                                geom = new THREE.SphereGeometry(shape.size[0], 16, 16);
+                                break;
+                            }
+                            case "cylinder": {
+                                geom = new THREE.CylinderGeometry(shape.size[0], shape.size[2], shape.size[1], 16);
+                                break;
+                            }
                         }
-                        case "cylinder": {
-                            geometry = new THREE.CylinderGeometry(obj.size[0], obj.size[1], obj.size[2]);
-                            break;
-                        }
-                        case "sphere": {
-                            geometry = new THREE.SphereGeometry(obj.size[0] / 2, 16, 16);
-                            break;
-                        }
+                        geometry.merge(geom, new THREE.Matrix4().makeTranslation(shape.position.x, shape.position.y, shape.position.z));
                     }
                     let material = new THREE.MeshStandardMaterial({color: 0x77ff77});
                     let mesh = new THREE.Mesh(geometry, material);
+                    scene.add(mesh);
                     mesh.receiveShadow = true;
                     mesh.castShadow = true;
-                    scene.add(mesh);
-
                     meshes[id] = mesh;
-
                     console.log(meshes);
                 }
 

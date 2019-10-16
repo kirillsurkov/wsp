@@ -6,7 +6,7 @@ function GameController(game, time_step) {
         68: "right",
         32: "jump",
         17: "duck"
-    }
+    };
 
     const Keys = {
         forward: 0,
@@ -15,9 +15,14 @@ function GameController(game, time_step) {
         right: 3,
         jump: 4,
         duck: 5
-    }
+    };
 
-    let time = window.performance.now();
+    const ShapeTypes = {
+        0: "sphere",
+        1: "box",
+        2: "cylinder"
+    };
+
     let world = new OIMO.World({gravity: [0, -10, 0], info: false, random: false, worldscale: 1, timeStep: time_step});
     let bodies = {};
 
@@ -28,13 +33,28 @@ function GameController(game, time_step) {
                 console.log("processing frame " + game.get_frame());
                 switch (action.type) {
                     case Action.create: {
+                        let oimo_types = [];
+                        let oimo_sizes = [];
+                        let oimo_shape_positions = [];
+                        for (let part of action.data.parts) {
+                            oimo_types.push(ShapeTypes[part.type]);
+                            for (let x of part.size) {
+                                oimo_sizes.push(x);
+                            }
+                            for (let x of part.position) {
+                                oimo_shape_positions.push(x);
+                            }
+                        }
+                        bodies[action.data.id] = world.add({type: oimo_types, move: action.data.moving, size: oimo_sizes, pos: action.data.position, posShape: oimo_shape_positions});
+                        console.log(bodies);
+                        let shapes = [];
+                        for (let shape = bodies[action.data.id].shapes, shape_i = oimo_types.length - 1; shape != null; shape = shape.next, shape_i--) {
+                            shapes.unshift({type: oimo_types[shape_i], position: shape.relativePosition, size: action.data.parts[shape_i].size});
+                        }
                         game.objects[action.data.id] = {
-                            type: {0: "box", 1: "cylinder", 2: "sphere"}[action.data.type],
-                            size: action.data.size.map(x => x*2),
+                            shapes: shapes,
                             position: action.data.position
                         };
-                        let obj = game.objects[action.data.id];
-                        bodies[action.data.id] = world.add({type: obj.type, move: action.data.moving, size: obj.size, pos: obj.position});
                         break;
                     }
                     case Action.state: {
@@ -42,7 +62,7 @@ function GameController(game, time_step) {
                         for (state of action.data.objects) {
                             let body = bodies[state.id];
                             if (!body) {
-                                console.log("BODY IS UNDEFINED");
+                                console.log("BODY " + state.id + " IS UNDEFINED");
                                 continue;
                             }
                             body.position.set(state.position[0], state.position[1], state.position[2]);

@@ -32,11 +32,11 @@ function Game(player_name) {
             return packets;
         },
         push_action: (type, data) => {
-            if (!actions[data.counter]) {
-                actions[data.counter] = [];
+            if (!actions[data.frame]) {
+                actions[data.frame] = [];
             }
-            actions[data.counter].push({type: type, data: data})
-            console.log(Object.keys(Action)[type] + " at frame " + data.counter + ". current is " + frame + ". time: " + performance.now());
+            actions[data.frame].push({type: type, data: data})
+            console.log(Object.keys(Action)[type] + " at frame " + data.frame + ". current is " + frame + ". time: " + performance.now());
         },
         process_actions: callback => {
             if (actions[frame]) {
