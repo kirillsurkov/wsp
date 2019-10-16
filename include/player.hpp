@@ -1,17 +1,16 @@
 #pragma once
 
-#include "object.hpp"
+#include "physics_object.hpp"
 
-class session_t;
-class player_t : public object_t {
+class player_t : public physics_object_t {
 private:
-    std::shared_ptr<session_t> m_session;
+	int m_player_id;
     std::string m_name;
 
 public:
-    player_t(std::shared_ptr<session_t> session, const std::string& name);
-    ~player_t();
+    player_t(int id, int body_id, int player_id, const std::string& name);
+    virtual ~player_t();
 
-    std::shared_ptr<session_t> get_session();
+    int get_player_id() const;
     const std::string& get_name() const;
 };

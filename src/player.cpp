@@ -1,10 +1,9 @@
 #include "precompiled.hpp"
 #include "player.hpp"
-#include "session.hpp"
 
-player_t::player_t(std::shared_ptr<session_t> session, const std::string& name) :
-	object_t(session->get_id()),
-    m_session(session),
+player_t::player_t(int id, int body_id, int player_id, const std::string& name) :
+	physics_object_t(id, body_id),
+	m_player_id(player_id),
     m_name(name)
 {
 }
@@ -12,8 +11,8 @@ player_t::player_t(std::shared_ptr<session_t> session, const std::string& name) 
 player_t::~player_t() {
 }
 
-std::shared_ptr<session_t> player_t::get_session() {
-    return m_session;
+int player_t::get_player_id() const {
+	return m_player_id;
 }
 
 const std::string& player_t::get_name() const {
