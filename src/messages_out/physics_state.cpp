@@ -1,10 +1,9 @@
 #include "precompiled.hpp"
 #include "messages_out/physics_state.hpp"
 
-message::out::physics_state_t::physics_state_t(int frame, float timer, const std::unordered_map<int, physics_t::object_state_t>& state) :
+message::out::physics_state_t::physics_state_t(int frame, const std::unordered_map<int, physics_t::object_state_t>& state) :
 	message_t(type::physics_state),
 	m_frame(frame),
-    m_timer(timer),
 	m_state(state)
 {
 }
@@ -13,10 +12,8 @@ message::out::physics_state_t::~physics_state_t() {
 }
 
 void message::out::physics_state_t::write_data(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
-	writer.String("counter");
+	writer.String("frame");
 	writer.Int(m_frame);
-	writer.String("timer");
-	writer.Double(m_timer);
 	writer.String("objects");
 	writer.StartArray();
 	for (auto& pair : m_state) {
