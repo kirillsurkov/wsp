@@ -1,10 +1,11 @@
 #include "precompiled.hpp"
 #include "physics.hpp"
 
+#include <rapidjson/writer.h>
+
 physics_t::physics_t(v8::Isolate* v8_isolate) :
 	m_v8_isolate(v8_isolate),
 	m_time_step(1.0f / 60.0f),
-	m_timer(0),
 	m_counter(0)
 {
 	init_context();
@@ -59,33 +60,73 @@ void physics_t::exec_js(const std::string& script, const std::function<void(cons
 }
 
 void physics_t::add_body(const object_t& object) {
-	std::string object_shape;
-	switch (object.type) {
-		case body_type::box: {
-			object_shape = "box";
-			break;
-		}
-		case body_type::cylinder: {
-			object_shape = "cylinder";
-			break;
-		}
-		case body_type::sphere: {
-			object_shape = "sphere";
-			break;
+	rapidjson::StringBuffer buffer;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+	writer.StartObject();
+
+	writer.String("type");
+	writer.StartArray();
+	for (const auto& shape : object.parts) {
+		switch (shape->type) {
+			case body_type::sphere: {
+				writer.String("sphere");
+				break;
+			}
+			case body_type::box: {
+				writer.String("box");
+				break;
+			}
+			case body_type::cylinder: {
+				writer.String("cylinder");
+				break;
+			}
 		}
 	}
-	std::string object_size = "[" + std::to_string(object.size.x * 2) + ", " + std::to_string(object.size.y * 2) + ", " + std::to_string(object.size.z * 2) + "]";
-	std::string object_pos = "[" + std::to_string(object.position.x) + ", " + std::to_string(object.position.y) + ", " + std::to_string(object.position.z) + "]";
-	exec_js("bodies[" + std::to_string(object.id) + "] = world.add({type: '" + object_shape + "', move: " + (object.moving ? "true" : "false") + ", size: " + object_size + ", pos: " + object_pos + "})");
+	writer.EndArray();
+
+	writer.String("size");
+	writer.StartArray();
+	for (const auto& shape : object.parts) {
+		writer.Double(shape->size.x);
+		writer.Double(shape->size.y);
+		writer.Double(shape->size.z);
+	}
+	writer.EndArray();
+	writer.String("posShape");
+	writer.StartArray();
+	for (const auto& shape : object.parts) {
+		writer.Double(shape->position.x);
+		writer.Double(shape->position.y);
+		writer.Double(shape->position.z);
+	}
+	writer.EndArray();
+
+	writer.String("pos");
+	writer.StartArray();
+	writer.Double(object.position.x);
+	writer.Double(object.position.y);
+	writer.Double(object.position.z);
+	writer.EndArray();
+
+	writer.String("move");
+	writer.Bool(object.moving);
+
+	writer.EndObject();
+
+	exec_js("bodies[" + std::to_string(object.id) + "] = world.add(" + buffer.GetString() + ")");
 }
 
-void physics_t::update(float delta) {
-	m_timer += delta;
-	while (m_timer >= m_time_step) {
-		m_timer -= m_time_step;
-		m_counter++;
-		exec_js("world.step()");
-	}
+void physics_t::add_player(int body_id) {
+    
+}
+
+void physics_t::destroy_body(int body_id) {
+	exec_js("delete bodies[" + std::to_string(body_id) + "]");
+}
+
+void physics_t::update() {
+	m_counter++;
+	exec_js("world.step()");
 }
 
 std::unordered_map<int, physics_t::object_state_t> physics_t::get_world_state() {
@@ -127,8 +168,8 @@ std::unordered_map<int, physics_t::object_state_t> physics_t::get_world_state() 
 	return res;
 }
 
-float physics_t::get_timer() const {
-    return m_timer;
+float physics_t::get_time_step() const {
+	return m_time_step;
 }
 
 int physics_t::get_current_frame() const {

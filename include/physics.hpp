@@ -8,17 +8,25 @@
 class physics_t {
 public:
 	enum class body_type {
+		sphere,
 		box,
-		cylinder,
-		sphere
+		cylinder
 	};
+
+    struct shape_t {
+		body_type type;
+		glm::vec3 position;
+		glm::vec4 rotation;
+		glm::vec3 size;
+    };
 
 	struct object_t {
 		int id;
-		body_type type;
 		bool moving;
-		glm::vec3 size;
 		glm::vec3 position;
+		glm::vec4 rotation;
+        glm::vec3 rotation_factor;
+        std::vector<std::shared_ptr<shape_t>> parts;
 	};
 
 	struct object_state_t {
@@ -47,7 +55,6 @@ private:
 	v8::Isolate* m_v8_isolate;
 	v8::Global<v8::Context> m_v8_context;
 	float m_time_step;
-	float m_timer;
 	int m_counter;
 
 	void init_context();
@@ -59,11 +66,14 @@ public:
 	~physics_t();
 
 	void add_body(const object_t& object);
+    void add_player(int body_id);
 
-	void update(float delta);
+    void destroy_body(int body_id);
+
+	void update();
 
 	std::unordered_map<int, physics_t::object_state_t> get_world_state();
 
-	float get_timer() const;
+	float get_time_step() const;
 	int get_current_frame() const;
 };
