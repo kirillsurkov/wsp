@@ -10,7 +10,7 @@ private:
 
 public:
     physics_object_t(int id, int body_id);
-    virtual ~physics_object_t();
+    virtual ~physics_object_t() override;
 
     void set_position(const glm::vec3& position);
     void set_rotation(const glm::vec4& rotation);

@@ -12,7 +12,7 @@ namespace message::out {
         virtual void write_data(rapidjson::Writer<rapidjson::StringBuffer>& writer) const override;
 
     public:
-        chat_local_t(int sender_id, const std::string& text);
-        virtual ~chat_local_t();
+        chat_local_t(int frame, int sender_id, const std::string& text);
+        virtual ~chat_local_t() override;
     };
 }

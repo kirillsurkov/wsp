@@ -9,7 +9,7 @@ namespace message::in {
 
     public:
         chat_global_t(const rapidjson::Value& json);
-        virtual ~chat_global_t();
+        virtual ~chat_global_t() override;
 
         const std::string& get_text() const;
     };

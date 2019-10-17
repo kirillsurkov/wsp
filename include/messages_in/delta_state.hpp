@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "message.hpp"
 
 class player_delta_t;
@@ -10,7 +12,7 @@ namespace message::in {
 
     public:
         delta_state_t(const rapidjson::Value& json);
-        virtual ~delta_state_t();
+        virtual ~delta_state_t() override;
 
         std::shared_ptr<player_delta_t> get_delta_state() const;
     };

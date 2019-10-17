@@ -157,7 +157,7 @@ void core_t::on_message(std::shared_ptr<session_t> session, const message::in::d
 
 void core_t::on_message(std::shared_ptr<session_t> session, const message::in::chat_local_t& message) {
     std::cout << "Chat local" << std::endl;
-    auto out_message = std::make_shared<message::out::chat_local_t>(session->get_player(), message.get_text());
+    auto out_message = std::make_shared<message::out::chat_local_t>(m_physics.get_current_frame(), session->get_player(), message.get_text());
     std::lock_guard<std::mutex> lock(m_objects_lock);
     for (auto& pair : m_sessions) {
         pair.second->send_message(out_message);

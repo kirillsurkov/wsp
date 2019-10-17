@@ -1,8 +1,8 @@
 #include "precompiled.hpp"
 #include "messages_out/chat_local.hpp"
 
-message::out::chat_local_t::chat_local_t(int sender_id, const std::string& text) :
-    message_t(type::chat_local),
+message::out::chat_local_t::chat_local_t(int frame, int sender_id, const std::string& text) :
+    message_t(type::chat_local, frame),
     m_sender_id(sender_id),
     m_text(text)
 {

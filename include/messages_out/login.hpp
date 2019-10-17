@@ -12,6 +12,6 @@ namespace message::out {
 
     public:
         login_t(int frame);
-        virtual ~login_t();
+        virtual ~login_t() override;
     };
 }

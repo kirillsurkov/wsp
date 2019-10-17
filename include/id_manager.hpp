@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_set>
+
 class id_manager_t {
 private:
     int m_used;

@@ -1,8 +1,9 @@
 #include "precompiled.hpp"
 #include "messages_out/message.hpp"
 
-message::out::message_t::message_t(message::out::type type) :
-    m_type(type)
+message::out::message_t::message_t(message::out::type type, int frame) :
+    m_type(type),
+    m_frame(frame)
 {
 }
 
@@ -18,6 +19,8 @@ void message::out::message_t::write_message(rapidjson::Writer<rapidjson::StringB
     writer.Int(static_cast<int>(m_type));
     writer.String("data");
     writer.StartObject();
+    writer.String("frame");
+    writer.Int(m_frame);
     write_data(writer);
     writer.EndObject();
     writer.EndObject();

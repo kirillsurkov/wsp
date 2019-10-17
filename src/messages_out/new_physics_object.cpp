@@ -2,8 +2,7 @@
 #include "messages_out/new_physics_object.hpp"
 
 message::out::new_physics_object_t::new_physics_object_t(int frame, const physics_t::object_t& object) :
-    message_t(type::new_physics_object),
-    m_frame(frame),
+    message_t(type::new_physics_object, frame),
     m_object(object)
 {
 }
@@ -12,8 +11,6 @@ message::out::new_physics_object_t::~new_physics_object_t() {
 }
 
 void message::out::new_physics_object_t::write_data(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
-    writer.String("frame");
-    writer.Int(m_frame);
     writer.String("id");
     writer.Int(m_object.id);
     writer.String("moving");

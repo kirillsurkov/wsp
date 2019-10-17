@@ -1,5 +1,9 @@
 #pragma once
 
+#include <thread>
+#include <mutex>
+#include <unordered_map>
+
 #include "id_manager.hpp"
 #include "messages_in.hpp"
 #include "physics.hpp"

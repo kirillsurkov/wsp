@@ -8,7 +8,6 @@
 namespace message::out {
     class physics_state_t : public message_t {
     private:
-        int m_frame;
         std::unordered_map<int, physics_t::object_state_t> m_state;
 
     protected:
@@ -16,6 +15,6 @@ namespace message::out {
 
     public:
         physics_state_t(int frame, const std::unordered_map<int, physics_t::object_state_t>& state);
-        virtual ~physics_state_t();
+        virtual ~physics_state_t() override;
     };
 }

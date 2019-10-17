@@ -1,5 +1,8 @@
 #pragma once
 
+#include <deque>
+
+#include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 

@@ -15,12 +15,13 @@ namespace message::out {
     class message_t {
     private:
         type m_type;
+        int m_frame;
 
     protected:
         virtual void write_data(rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
 
     public:
-        message_t(message::out::type type);
+        message_t(message::out::type type, int frame);
         virtual ~message_t();
 
         void write_message(rapidjson::Writer<rapidjson::StringBuffer>& writer) const;

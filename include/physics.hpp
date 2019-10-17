@@ -1,5 +1,8 @@
 #pragma once
 
+#include <functional>
+#include <unordered_map>
+
 #include <v8.h>
 #include <libplatform/libplatform.h>
 

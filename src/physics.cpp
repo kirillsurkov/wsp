@@ -30,7 +30,7 @@ void physics_t::init_engine() {
     std::string oimo_src;
     std::ifstream input("./web/oimo.min.js");
     input.seekg(0, std::ios::end);
-    size_t size = input.tellg();
+    auto size = input.tellg();
     input.seekg(0, std::ios::beg);
     oimo_src.resize(size);
     input.read(&oimo_src[0], size);
