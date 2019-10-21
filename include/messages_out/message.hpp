@@ -8,8 +8,8 @@ namespace message::out {
         login = 1,
         chat_local,
         chat_global,
-        new_physics_object,
-        physics_state
+        body_create,
+        body_state
     };
 
     class message_t {

@@ -1,16 +1,19 @@
 #include "precompiled.hpp"
-#include "messages_out/physics_state.hpp"
+#include "messages_out/body_state.hpp"
 
-message::out::physics_state_t::physics_state_t(int frame, const std::unordered_map<int, physics_t::object_state_t>& state) :
-    message_t(type::physics_state, frame),
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+
+message::out::body_state_t::body_state_t(int frame, const std::unordered_map<int, physics_object_t::body_state_t>& state) :
+    message_t(type::body_state, frame),
     m_state(state)
 {
 }
 
-message::out::physics_state_t::~physics_state_t() {
+message::out::body_state_t::~body_state_t() {
 }
 
-void message::out::physics_state_t::write_data(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
+void message::out::body_state_t::write_data(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
     writer.String("objects");
     writer.StartArray();
     for (auto& pair : m_state) {
