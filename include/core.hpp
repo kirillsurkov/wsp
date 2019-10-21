@@ -13,7 +13,10 @@ class session_t;
 class game_object_t;
 class core_t {
 private:
-    physics_t& m_physics;
+    std::shared_ptr<physics_t> m_physics;
+
+    float m_time_step;
+    int m_current_frame;
 
     id_manager_t m_objects_id_manager;
     id_manager_t m_physics_id_manager;
@@ -23,15 +26,15 @@ private:
 
     std::mutex m_objects_lock;
     std::unordered_map<int, std::shared_ptr<game_object_t>> m_objects;
-    std::unordered_map<int, int> m_player_to_object;
     std::unordered_map<int, std::shared_ptr<session_t>> m_sessions;
+    std::unordered_map<int, int> m_player_to_object;
 
     void main_loop();
 
     void init_physics();
 
 public:
-    core_t(physics_t& physics);
+    core_t(std::shared_ptr<physics_t> physics, float time_step);
     ~core_t();
 
     void on_disconnect(std::shared_ptr<session_t> session);
