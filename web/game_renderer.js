@@ -53,7 +53,6 @@ function GameRenderer(game, width, height) {
                     mesh.receiveShadow = true;
                     mesh.castShadow = true;
                     meshes[id] = mesh;
-                    console.log(meshes);
                 }
 
                 let xx = obj.rotation.x - meshes[id].quaternion.x;

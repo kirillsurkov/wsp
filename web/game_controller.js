@@ -32,11 +32,11 @@ function GameController(game, time_step) {
             game.process_actions(action => {
                 console.log("processing frame " + game.get_frame());
                 switch (action.type) {
-                    case Action.create: {
+                    case Action.body_create: {
                         let oimo_types = [];
                         let oimo_sizes = [];
                         let oimo_shape_positions = [];
-                        for (let part of action.data.parts) {
+                        for (let part of action.data.shapes) {
                             oimo_types.push(ShapeTypes[part.type]);
                             for (let x of part.size) {
                                 oimo_sizes.push(x);
@@ -45,11 +45,10 @@ function GameController(game, time_step) {
                                 oimo_shape_positions.push(x);
                             }
                         }
-                        bodies[action.data.id] = world.add({type: oimo_types, move: action.data.moving, size: oimo_sizes, pos: action.data.position, posShape: oimo_shape_positions});
-                        console.log(bodies);
+                        bodies[action.data.id] = world.add({type: oimo_types, move: action.data.moving, size: oimo_sizes, pos: action.data.position, posShape: oimo_shape_positions, allowSleep: false});
                         let shapes = [];
                         for (let shape = bodies[action.data.id].shapes, shape_i = oimo_types.length - 1; shape != null; shape = shape.next, shape_i--) {
-                            shapes.unshift({type: oimo_types[shape_i], position: shape.relativePosition, size: action.data.parts[shape_i].size});
+                            shapes.unshift({type: oimo_types[shape_i], position: shape.relativePosition, size: action.data.shapes[shape_i].size});
                         }
                         game.objects[action.data.id] = {
                             shapes: shapes,
@@ -57,7 +56,7 @@ function GameController(game, time_step) {
                         };
                         break;
                     }
-                    case Action.state: {
+                    case Action.body_state: {
                         update_world = false;
                         for (state of action.data.objects) {
                             let body = bodies[state.id];

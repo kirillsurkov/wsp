@@ -1,7 +1,7 @@
 const msg_in = {
     login: 1,
-    p_create: 4,
-    p_state: 5
+    body_create: 4,
+    body_state: 5
 };
 
 const msg_out = {
@@ -24,12 +24,12 @@ function GameNetworking(game) {
                     game.set_frame(message.data.frame - 5);
                     break;
                 }
-                case msg_in.p_create: {
-                    game.push_action(Action.create, message.data);
+                case msg_in.body_create: {
+                    game.push_action(Action.body_create, message.data);
                     break;
                 }
-                case msg_in.p_state: {
-                    game.push_action(Action.state, message.data);
+                case msg_in.body_state: {
+                    game.push_action(Action.body_state, message.data);
                     break;
                 }
             }

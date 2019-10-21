@@ -1,7 +1,8 @@
 const Action = {
-    create: 0,
-    state: 1,
-    key: 2
+    body_create: 0,
+    body_state: 1,
+    object_create: 2,
+    key: 3
 }
 
 function Game(player_name) {
