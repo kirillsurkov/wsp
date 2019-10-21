@@ -7,5 +7,5 @@
 class box_t : public physics_object_t {
 public:
     box_t(int id, int body_id, const glm::vec3& size);
-    virtual ~box_t();
+    virtual ~box_t() override;
 };
