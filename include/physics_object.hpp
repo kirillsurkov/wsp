@@ -31,9 +31,8 @@ public:
     private:
         int m_id;
         bool m_moving;
-        glm::vec3 m_position;
-        glm::vec4 m_rotation;
         glm::vec3 m_rotation_factor;
+        body_state_t m_state;
         std::vector<std::shared_ptr<shape_t>> m_shapes;
 
     public:
@@ -41,17 +40,16 @@ public:
         ~body_t();
 
         void set_moving(bool moving);
-        void set_position(const glm::vec3& position);
-        void set_rotation(const glm::vec4& rotation);
         void set_rotation_factor(const glm::vec3& rotation_factor);
         void add_shape(shape_type type, const glm::vec3& position, const glm::vec4& rotation, const glm::vec3& size);
 
         int get_id() const;
         bool is_moving() const;
-        const glm::vec3& get_position() const;
-        const glm::vec4& get_rotation() const;
         const glm::vec3& get_rotation_factor() const;
         const std::vector<std::shared_ptr<shape_t>>& get_shapes() const;
+
+        const body_state_t& get_state() const;
+        body_state_t& get_state();
     };
 
 protected:
@@ -61,10 +59,11 @@ public:
     physics_object_t(int id, int body_id);
     virtual ~physics_object_t() override;
 
-    void set_position(const glm::vec3& position);
-    void set_rotation(const glm::vec4& rotation);
     virtual const glm::vec3& get_position() const override;
     virtual const glm::vec4& get_rotation() const override;
 
-    const body_t& get_body() const;
+    void set_position(const glm::vec3& position);
+    void set_rotation(const glm::vec4& rotation);
+
+    body_t& get_body();
 };
