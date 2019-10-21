@@ -10,5 +10,7 @@ public:
     virtual void add_body(const physics_object_t::body_t& body) = 0;
     virtual void destroy_body(int body_id) = 0;
 
+    virtual void update_body_state(physics_object_t::body_t& body) = 0;
+
     virtual void update() = 0;
 };

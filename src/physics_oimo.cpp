@@ -122,7 +122,7 @@ void physics_oimo_t::add_body(const physics_object_t::body_t& body) {
 
     writer.String("pos");
     writer.StartArray();
-    const auto& position = body.get_position();
+    const auto& position = body.get_state().position;
     writer.Double(position.x);
     writer.Double(position.y);
     writer.Double(position.z);
@@ -130,6 +130,9 @@ void physics_oimo_t::add_body(const physics_object_t::body_t& body) {
 
     writer.String("move");
     writer.Bool(body.is_moving());
+
+    writer.String("allowSleep");
+    writer.Bool(false);
 
     writer.EndObject();
 
@@ -140,45 +143,43 @@ void physics_oimo_t::destroy_body(int body_id) {
     exec_js("delete bodies[" + std::to_string(body_id) + "]");
 }
 
-void physics_oimo_t::update() {
-    exec_js("world.step()");
-}
-
-std::unordered_map<int, physics_object_t::body_state_t> physics_oimo_t::get_world_state() {
-    std::unordered_map<int, object_state_t> res;
-    exec_js("bodies", [this, &res](const v8::Local<v8::Value>& value, const v8::Local<v8::Context>& context) {
-        auto bodies = value->ToObject(context).ToLocalChecked();
-        auto keys = bodies->GetOwnPropertyNames(context).ToLocalChecked();
+void physics_oimo_t::update_body_state(physics_object_t::body_t& out_body) {
+    exec_js("bodies[" + std::to_string(out_body.get_id()) + "]", [&](const v8::Local<v8::Value>& value, const v8::Local<v8::Context>& context) {
+        auto body = value->ToObject(context).ToLocalChecked();
         auto field_x = v8::String::NewFromUtf8(m_v8_isolate, "x").ToLocalChecked();
         auto field_y = v8::String::NewFromUtf8(m_v8_isolate, "y").ToLocalChecked();
         auto field_z = v8::String::NewFromUtf8(m_v8_isolate, "z").ToLocalChecked();
         auto field_w = v8::String::NewFromUtf8(m_v8_isolate, "w").ToLocalChecked();
-        for (int i = 0, cnt = keys->Length(); i < cnt; i++) {
-            glm::vec3 position;
-            glm::vec4 rotation;
-            glm::vec3 linear_speed;
-            glm::vec3 angular_speed;
-            auto id = keys->Get(context, i).ToLocalChecked();
-            auto body = bodies->Get(context, id).ToLocalChecked()->ToObject(context).ToLocalChecked();
-            auto field = body->Get(context, v8::String::NewFromUtf8(m_v8_isolate, "position").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
-            position.x = field->Get(context, field_x).ToLocalChecked()->NumberValue(context).ToChecked();
-            position.y = field->Get(context, field_y).ToLocalChecked()->NumberValue(context).ToChecked();
-            position.z = field->Get(context, field_z).ToLocalChecked()->NumberValue(context).ToChecked();
-            field = body->Get(context, v8::String::NewFromUtf8(m_v8_isolate, "quaternion").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
-            rotation.x = field->Get(context, field_x).ToLocalChecked()->NumberValue(context).ToChecked();
-            rotation.y = field->Get(context, field_y).ToLocalChecked()->NumberValue(context).ToChecked();
-            rotation.z = field->Get(context, field_z).ToLocalChecked()->NumberValue(context).ToChecked();
-            rotation.w = field->Get(context, field_w).ToLocalChecked()->NumberValue(context).ToChecked();
-            field = body->Get(context, v8::String::NewFromUtf8(m_v8_isolate, "linearVelocity").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
-            linear_speed.x = field->Get(context, field_x).ToLocalChecked()->NumberValue(context).ToChecked();
-            linear_speed.y = field->Get(context, field_y).ToLocalChecked()->NumberValue(context).ToChecked();
-            linear_speed.z = field->Get(context, field_z).ToLocalChecked()->NumberValue(context).ToChecked();
-            field = body->Get(context, v8::String::NewFromUtf8(m_v8_isolate, "angularVelocity").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
-            angular_speed.x = field->Get(context, field_x).ToLocalChecked()->NumberValue(context).ToChecked();
-            angular_speed.y = field->Get(context, field_y).ToLocalChecked()->NumberValue(context).ToChecked();
-            angular_speed.z = field->Get(context, field_z).ToLocalChecked()->NumberValue(context).ToChecked();
-            res[static_cast<int>(id->NumberValue(context).ToChecked())] = object_state_t{position, rotation, linear_speed, angular_speed};
-        }
+        glm::vec3 position;
+        glm::vec4 rotation;
+        glm::vec3 linear_speed;
+        glm::vec3 angular_speed;
+        auto field = body->Get(context, v8::String::NewFromUtf8(m_v8_isolate, "position").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
+        position.x = field->Get(context, field_x).ToLocalChecked()->NumberValue(context).ToChecked();
+        position.y = field->Get(context, field_y).ToLocalChecked()->NumberValue(context).ToChecked();
+        position.z = field->Get(context, field_z).ToLocalChecked()->NumberValue(context).ToChecked();
+        field = body->Get(context, v8::String::NewFromUtf8(m_v8_isolate, "quaternion").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
+        rotation.x = field->Get(context, field_x).ToLocalChecked()->NumberValue(context).ToChecked();
+        rotation.y = field->Get(context, field_y).ToLocalChecked()->NumberValue(context).ToChecked();
+        rotation.z = field->Get(context, field_z).ToLocalChecked()->NumberValue(context).ToChecked();
+        rotation.w = field->Get(context, field_w).ToLocalChecked()->NumberValue(context).ToChecked();
+        field = body->Get(context, v8::String::NewFromUtf8(m_v8_isolate, "linearVelocity").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
+        linear_speed.x = field->Get(context, field_x).ToLocalChecked()->NumberValue(context).ToChecked();
+        linear_speed.y = field->Get(context, field_y).ToLocalChecked()->NumberValue(context).ToChecked();
+        linear_speed.z = field->Get(context, field_z).ToLocalChecked()->NumberValue(context).ToChecked();
+        field = body->Get(context, v8::String::NewFromUtf8(m_v8_isolate, "angularVelocity").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked();
+        angular_speed.x = field->Get(context, field_x).ToLocalChecked()->NumberValue(context).ToChecked();
+        angular_speed.y = field->Get(context, field_y).ToLocalChecked()->NumberValue(context).ToChecked();
+        angular_speed.z = field->Get(context, field_z).ToLocalChecked()->NumberValue(context).ToChecked();
+
+        auto& state = out_body.get_state();
+        state.position = position;
+        state.rotation = rotation;
+        state.linear_speed = linear_speed;
+        state.angular_speed = angular_speed;
     });
-    return res;
+}
+
+void physics_oimo_t::update() {
+    exec_js("world.step()");
 }

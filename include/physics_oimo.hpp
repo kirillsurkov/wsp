@@ -22,5 +22,7 @@ public:
     virtual void add_body(const physics_object_t::body_t& body) override;
     virtual void destroy_body(int body_id) override;
 
+    virtual void update_body_state(physics_object_t::body_t& body) override;
+
     virtual void update() override;
 };
