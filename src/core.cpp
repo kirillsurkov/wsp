@@ -118,7 +118,7 @@ void core_t::on_disconnect(std::shared_ptr<session_t> session) {
     std::cout << "Player " << player->get_name() << " disconnected" << std::endl;
 }
 
-void core_t::on_message(std::shared_ptr<session_t> session, const message::in::login_t& message) {
+void core_t::on_message(std::shared_ptr<session_t> session, const std::shared_ptr<message::in::login_t>& message) {
     if (session->get_player()) {
         return;
     }
@@ -129,35 +129,35 @@ void core_t::on_message(std::shared_ptr<session_t> session, const message::in::l
     int body_id = m_physics_id_manager.next_id();
     int player_id = m_players_id_manager.next_id();
 
-    auto player = std::make_shared<player_t>(object_id, body_id, player_id, message.get_name());
+    auto player = std::make_shared<player_t>(object_id, body_id, player_id, message->get_name());
     m_objects[object_id] = player;
     m_player_to_object[player_id] = object_id;
     m_sessions[player_id] = session;
     m_physics->add_body(player->get_body());
     session->set_player(player_id);
 
-    LOG << "New player " << message.get_name();
+    LOG << "New player " << player->get_name();
 
     session->send_message(std::make_shared<message::out::login_t>(m_current_frame));
 
-    if (message.get_name() == "glowstick") {
+    if (player->get_name() == "glowstick") {
         init_physics();
     }
 }
 
-void core_t::on_message(std::shared_ptr<session_t> session, const message::in::delta_state_t& message) {
+void core_t::on_message(std::shared_ptr<session_t> session, const std::shared_ptr<message::in::delta_state_t>& message) {
     std::cout << "Delta state" << std::endl;
 }
 
-void core_t::on_message(std::shared_ptr<session_t> session, const message::in::chat_local_t& message) {
+void core_t::on_message(std::shared_ptr<session_t> session, const std::shared_ptr<message::in::chat_local_t>& message) {
     std::cout << "Chat local" << std::endl;
-    auto out_message = std::make_shared<message::out::chat_local_t>(m_current_frame, session->get_player(), message.get_text());
+    auto out_message = std::make_shared<message::out::chat_local_t>(m_current_frame, session->get_player(), message->get_text());
     std::lock_guard<std::mutex> lock(m_objects_lock);
     for (auto& pair : m_sessions) {
         pair.second->send_message(out_message);
     }
 }
 
-void core_t::on_message(std::shared_ptr<session_t> session, const message::in::chat_global_t& message) {
+void core_t::on_message(std::shared_ptr<session_t> session, const std::shared_ptr<message::in::chat_global_t>& message) {
     std::cout << "Chat global" << std::endl;
 }

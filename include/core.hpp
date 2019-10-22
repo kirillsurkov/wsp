@@ -37,8 +37,8 @@ public:
     virtual ~core_t() override;
 
     virtual void on_disconnect(std::shared_ptr<session_t> session) override;
-    virtual void on_message(std::shared_ptr<session_t> session, const message::in::login_t& message) override;
-    virtual void on_message(std::shared_ptr<session_t> session, const message::in::delta_state_t& message) override;
-    virtual void on_message(std::shared_ptr<session_t> session, const message::in::chat_local_t& message) override;
-    virtual void on_message(std::shared_ptr<session_t> session, const message::in::chat_global_t& message) override;
+    virtual void on_message(std::shared_ptr<session_t> session, const std::shared_ptr<message::in::login_t>& message) override;
+    virtual void on_message(std::shared_ptr<session_t> session, const std::shared_ptr<message::in::delta_state_t>& message) override;
+    virtual void on_message(std::shared_ptr<session_t> session, const std::shared_ptr<message::in::chat_local_t>& message) override;
+    virtual void on_message(std::shared_ptr<session_t> session, const std::shared_ptr<message::in::chat_global_t>& message) override;
 };

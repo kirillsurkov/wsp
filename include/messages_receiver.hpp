@@ -9,8 +9,8 @@ public:
     virtual ~messages_receiver_t();
 
     virtual void on_disconnect(std::shared_ptr<session_t> session) = 0;
-    virtual void on_message(std::shared_ptr<session_t> session, const message::in::login_t& message) = 0;
-    virtual void on_message(std::shared_ptr<session_t> session, const message::in::delta_state_t& message) = 0;
-    virtual void on_message(std::shared_ptr<session_t> session, const message::in::chat_local_t& message) = 0;
-    virtual void on_message(std::shared_ptr<session_t> session, const message::in::chat_global_t& message) = 0;
+    virtual void on_message(std::shared_ptr<session_t> session, const std::shared_ptr<message::in::login_t>& message) = 0;
+    virtual void on_message(std::shared_ptr<session_t> session, const std::shared_ptr<message::in::delta_state_t>& message) = 0;
+    virtual void on_message(std::shared_ptr<session_t> session, const std::shared_ptr<message::in::chat_local_t>& message) = 0;
+    virtual void on_message(std::shared_ptr<session_t> session, const std::shared_ptr<message::in::chat_global_t>& message) = 0;
 };
