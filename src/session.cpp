@@ -1,11 +1,9 @@
 #include "precompiled.hpp"
 #include "session.hpp"
-#include "player.hpp"
-#include "core.hpp"
 
 #define PROCESS_MESSAGE(msg) \
     case message::in::type::msg: { \
-        m_core.on_message(this_ptr, message::in::msg##_t(data)); \
+        m_messages_receiver->on_message(this_ptr, message::in::msg##_t(data)); \
         break; \
     }
 
@@ -14,11 +12,12 @@
     PROCESS_MESSAGE(chat_local) \
     PROCESS_MESSAGE(chat_global)
 
-session_t::session_t(boost::asio::io_context& io, core_t& core, boost::asio::ip::tcp::socket&& socket) :
+session_t::session_t(boost::asio::io_context& io, std::shared_ptr<messages_receiver_t> messages_receiver, boost::asio::ip::tcp::socket&& socket, network_t::writer_type writer) :
     m_io(io),
     m_strand(io),
-    m_core(core),
+    m_messages_receiver(messages_receiver),
     m_ws(std::move(socket)),
+    m_writer_type(writer),
     m_player(0),
     m_connected(false)
 {
@@ -42,7 +41,7 @@ void session_t::process_message(const rapidjson::Value& json) {
     const auto& data = json["data"];
     auto this_ptr = shared_from_this();
     if (!m_player && type == message::in::type::login) {
-        m_core.on_message(this_ptr, message::in::login_t(data));
+        m_messages_receiver->on_message(this_ptr, message::in::login_t(data));
     } else switch (type) {
         PROCESS_MESSAGES
         default: {
@@ -56,7 +55,7 @@ void session_t::do_read() {
     m_ws.async_read(m_buffer, [this_ptr](boost::beast::error_code err, std::size_t count) {
         if (err) {
             this_ptr->m_connected = false;
-            this_ptr->m_core.on_disconnect(this_ptr);
+            this_ptr->m_messages_receiver->on_disconnect(this_ptr);
             return;
         }
         rapidjson::Document json;
@@ -77,15 +76,23 @@ void session_t::do_read() {
 void session_t::do_write() {
     int count = std::min(m_messages_queue.size(), 100ul);
 
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    writer.StartArray();
-    for (auto it = m_messages_queue.begin(); it != m_messages_queue.begin() + count; it++) {
-        (*it)->write_message(writer);
-    }
-    writer.EndArray();
+    switch (m_writer_type) {
+        case network_t::writer_type::json: {
+            rapidjson::StringBuffer buffer;
+            rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+            writer.StartArray();
+            for (auto it = m_messages_queue.begin(); it != m_messages_queue.begin() + count; it++) {
+                (*it)->write_message(writer);
+            }
+            writer.EndArray();
 
-    m_write_buffer = std::string(buffer.GetString(), buffer.GetSize());
+            m_write_buffer = std::string(buffer.GetString(), buffer.GetSize());
+            break;
+        }
+        case network_t::writer_type::binary: {
+            break;
+        }
+    }
 
     auto this_ptr = shared_from_this();
     m_ws.async_write(boost::asio::buffer(m_write_buffer), m_strand.wrap([this_ptr, count](boost::beast::error_code err, std::size_t) {

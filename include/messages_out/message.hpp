@@ -25,6 +25,7 @@ namespace message::out {
         virtual ~message_t();
 
         void write_message(rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
+
         std::string to_string() const;
     };
 }

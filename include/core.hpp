@@ -5,13 +5,12 @@
 #include <unordered_map>
 
 #include "id_manager.hpp"
-#include "messages_in.hpp"
 #include "physics.hpp"
+#include "messages_receiver.hpp"
 
 class id_manager_t;
-class session_t;
 class game_object_t;
-class core_t {
+class core_t : public messages_receiver_t {
 private:
     std::shared_ptr<physics_t> m_physics;
 
@@ -35,11 +34,11 @@ private:
 
 public:
     core_t(std::shared_ptr<physics_t> physics, float time_step);
-    ~core_t();
+    virtual ~core_t() override;
 
-    void on_disconnect(std::shared_ptr<session_t> session);
-    void on_message(std::shared_ptr<session_t> session, const message::in::login_t& message);
-    void on_message(std::shared_ptr<session_t> session, const message::in::delta_state_t& message);
-    void on_message(std::shared_ptr<session_t> session, const message::in::chat_local_t& message);
-    void on_message(std::shared_ptr<session_t> session, const message::in::chat_global_t& message);
+    virtual void on_disconnect(std::shared_ptr<session_t> session) override;
+    virtual void on_message(std::shared_ptr<session_t> session, const message::in::login_t& message) override;
+    virtual void on_message(std::shared_ptr<session_t> session, const message::in::delta_state_t& message) override;
+    virtual void on_message(std::shared_ptr<session_t> session, const message::in::chat_local_t& message) override;
+    virtual void on_message(std::shared_ptr<session_t> session, const message::in::chat_global_t& message) override;
 };
