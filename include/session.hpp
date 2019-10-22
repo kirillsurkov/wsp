@@ -31,10 +31,7 @@ private:
 
     std::deque<std::shared_ptr<message::out::message_t>> m_messages_queue;
 
-    message::in::type get_message_type(const rapidjson::Value& json) const;
-    message::in::type get_message_type(const void* buffer) const;
-    void process_message(const rapidjson::Value& json);
-    void process_message(const void* buffer);
+    void process_message(const std::shared_ptr<message::in::message_t>& message);
 
     void do_read();
     void do_write();

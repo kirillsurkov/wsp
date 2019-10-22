@@ -1,16 +1,32 @@
 #include "precompiled.hpp"
 #include "session.hpp"
 
-#define PROCESS_MESSAGE(msg) \
+#include <boost/preprocessor/seq/for_each.hpp>
+
+#define MESSAGES (login)(delta_state)(chat_local)(chat_global)
+
+#define CREATE_MESSAGE_MACRO(r, data, msg) \
     case message::in::type::msg: { \
-        m_messages_receiver->on_message(this_ptr, message::in::msg##_t(data)); \
+        created_msg = message::in::BOOST_PP_CAT(msg, _t)::create(data); \
         break; \
     }
 
-#define PROCESS_MESSAGES \
-    PROCESS_MESSAGE(delta_state) \
-    PROCESS_MESSAGE(chat_local) \
-    PROCESS_MESSAGE(chat_global)
+#define PROCESS_MESSAGE_MACRO(r, data, msg) \
+    case message::in::type::msg: { \
+        m_messages_receiver->on_message(this_ptr, std::dynamic_pointer_cast<message::in::BOOST_PP_CAT(msg, _t)>(data)); \
+        break; \
+    }
+
+#define EXPAND_MESSAGES(macro, type, data) \
+    switch (type) { \
+        BOOST_PP_SEQ_FOR_EACH(macro, data, MESSAGES) \
+        default: { \
+            throw std::runtime_error("Unknown message type"); \
+        } \
+    }
+
+#define PROCESS_MESSAGE(msg) EXPAND_MESSAGES(PROCESS_MESSAGE_MACRO, msg->get_type(), msg)
+#define CREATE_MESSAGE(type, data) EXPAND_MESSAGES(CREATE_MESSAGE_MACRO, type, data)
 
 session_t::session_t(boost::asio::io_context& io, std::shared_ptr<messages_receiver_t> messages_receiver, boost::asio::ip::tcp::socket&& socket, network_t::protocol protocol) :
     m_io(io),
@@ -26,28 +42,13 @@ session_t::session_t(boost::asio::io_context& io, std::shared_ptr<messages_recei
 session_t::~session_t() {
 }
 
-message::in::type session_t::get_message_type(const rapidjson::Value& json) const {
-    do {
-        if (!json.IsObject()) break;
-        const auto& type_doc = json["type"];
-        if (!type_doc.IsInt()) break;
-        return static_cast<message::in::type>(type_doc.GetInt());
-    } while (false);
-    throw std::runtime_error("Invalid message type");
-}
-
-void session_t::process_message(const rapidjson::Value& json) {
-    message::in::type type = get_message_type(json);
-    const auto& data = json["data"];
+void session_t::process_message(const std::shared_ptr<message::in::message_t>& message) {
     auto this_ptr = shared_from_this();
-    if (!m_player && type == message::in::type::login) {
-        m_messages_receiver->on_message(this_ptr, message::in::login_t(data));
-    } else switch (type) {
-        PROCESS_MESSAGES
-        default: {
-            throw std::runtime_error("Unknown message type");
+    if (message->get_type() == message::in::type::login) {
+        if (!m_player) {
+            m_messages_receiver->on_message(this_ptr, std::dynamic_pointer_cast<message::in::login_t>(message));
         }
-    }
+    } else PROCESS_MESSAGE(message)
 }
 
 void session_t::do_read() {
@@ -58,23 +59,51 @@ void session_t::do_read() {
             this_ptr->m_messages_receiver->on_disconnect(this_ptr);
             return;
         }
-        switch (this_ptr->m_protocol) {
-            case network_t::protocol::json: {
-                rapidjson::Document json;
-                auto jerr = json.Parse(std::string(reinterpret_cast<char*>(this_ptr->m_buffer.data().data()), count).c_str()).GetParseError();
-                if (jerr == rapidjson::kParseErrorNone && json.IsArray()) {
-                    for (auto it = json.Begin(); it != json.End(); it++) {
-                        try {
-                            this_ptr->process_message(*it);
-                        } catch (const std::exception&) {
+        auto raw_bytes = static_cast<unsigned char*>(this_ptr->m_buffer.data().data());
+        try {
+            switch (this_ptr->m_protocol) {
+                case network_t::protocol::json: {
+                    rapidjson::Document json;
+                    if (json.Parse(std::string(reinterpret_cast<char*>(raw_bytes), count).c_str()).GetParseError() == rapidjson::kParseErrorNone) {
+                        if (!json.IsArray()) {
+                            throw std::runtime_error("Bad json");
+                        }
+                        for (auto it = json.Begin(); it != json.End(); it++) {
+                            try {
+                                const auto& json = *it;
+                                if (!json.IsObject() || !json["type"].IsInt()) {
+                                    throw std::runtime_error("Bad message format");
+                                }
+                                auto type = static_cast<message::in::type>(json["type"].GetInt());
+                                const auto& data = json["data"];
+                                std::shared_ptr<message::in::message_t> created_msg;
+                                CREATE_MESSAGE(type, data)
+                                this_ptr->process_message(created_msg);
+                            } catch (const std::exception& e) {
+                                LOG << e.what();
+                            }
                         }
                     }
+                    break;
                 }
-                break;
+                case network_t::protocol::binary: {
+                    binary_data_t data(raw_bytes, count);
+                    int count = data.get_uint8();
+                    for (int i = 0; i < count; i++) {
+                        try {
+                            auto type = static_cast<message::in::type>(data.get_uint8());
+                            std::shared_ptr<message::in::message_t> created_msg;
+                            CREATE_MESSAGE(type, data)
+                            this_ptr->process_message(created_msg);
+                        } catch (const std::exception& e) {
+                            LOG << e.what();
+                        }
+                    }
+                    break;
+                }
             }
-            case network_t::protocol::binary: {
-                break;
-            }
+        } catch (const std::exception& e) {
+            LOG << e.what();
         }
 
         this_ptr->m_buffer.consume(count);
