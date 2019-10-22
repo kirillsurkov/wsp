@@ -68,6 +68,7 @@ function GameNetworking(game, protocol) {
     return {
         connect: ip => {
             socket = new WebSocket("ws://" + ip);
+            socket.binaryType = "arraybuffer";
             socket.onopen = on_connect;
             socket.onmessage = on_message;
         },
