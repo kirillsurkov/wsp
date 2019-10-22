@@ -5,7 +5,8 @@ physics_object_t::body_t::body_t(int id) :
     m_id(id),
     m_moving(false),
     m_rotation_factor(glm::vec3(1.0f, 1.0f, 1.0f)),
-    m_state({glm::vec3(0.0f, 0.0f, 0.0f),
+    m_state({false,
+            glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
             glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3(0.0f, 0.0f, 0.0f)})

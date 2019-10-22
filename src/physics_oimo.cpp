@@ -131,9 +131,6 @@ void physics_oimo_t::add_body(const physics_object_t::body_t& body) {
     writer.String("move");
     writer.Bool(body.is_moving());
 
-    writer.String("allowSleep");
-    writer.Bool(false);
-
     writer.EndObject();
 
     exec_js("bodies[" + std::to_string(body.get_id()) + "] = world.add(" + buffer.GetString() + ")");

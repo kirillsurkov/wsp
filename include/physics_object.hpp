@@ -21,6 +21,7 @@ public:
     };
 
     struct body_state_t {
+        bool sleeping;
         glm::vec3 position;
         glm::vec4 rotation;
         glm::vec3 linear_speed;
@@ -32,8 +33,8 @@ public:
         int m_id;
         bool m_moving;
         glm::vec3 m_rotation_factor;
-        body_state_t m_state;
         std::vector<std::shared_ptr<shape_t>> m_shapes;
+        body_state_t m_state;
 
     public:
         body_t(int id);
