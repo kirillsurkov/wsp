@@ -12,12 +12,12 @@
     PROCESS_MESSAGE(chat_local) \
     PROCESS_MESSAGE(chat_global)
 
-session_t::session_t(boost::asio::io_context& io, std::shared_ptr<messages_receiver_t> messages_receiver, boost::asio::ip::tcp::socket&& socket, network_t::writer_type writer) :
+session_t::session_t(boost::asio::io_context& io, std::shared_ptr<messages_receiver_t> messages_receiver, boost::asio::ip::tcp::socket&& socket, network_t::protocol protocol) :
     m_io(io),
     m_strand(io),
     m_messages_receiver(messages_receiver),
     m_ws(std::move(socket)),
-    m_writer_type(writer),
+    m_protocol(protocol),
     m_player(0),
     m_connected(false)
 {
@@ -58,26 +58,35 @@ void session_t::do_read() {
             this_ptr->m_messages_receiver->on_disconnect(this_ptr);
             return;
         }
-        rapidjson::Document json;
-        auto jerr = json.Parse(std::string(reinterpret_cast<char*>(this_ptr->m_buffer.data().data()), count).c_str()).GetParseError();
-        if (jerr == rapidjson::kParseErrorNone && json.IsArray()) {
-            for (auto it = json.Begin(); it != json.End(); it++) {
-                try {
-                    this_ptr->process_message(*it);
-                } catch (const std::exception&) {
+        switch (this_ptr->m_protocol) {
+            case network_t::protocol::json: {
+                rapidjson::Document json;
+                auto jerr = json.Parse(std::string(reinterpret_cast<char*>(this_ptr->m_buffer.data().data()), count).c_str()).GetParseError();
+                if (jerr == rapidjson::kParseErrorNone && json.IsArray()) {
+                    for (auto it = json.Begin(); it != json.End(); it++) {
+                        try {
+                            this_ptr->process_message(*it);
+                        } catch (const std::exception&) {
+                        }
+                    }
                 }
+                break;
+            }
+            case network_t::protocol::binary: {
+                break;
             }
         }
+
         this_ptr->m_buffer.consume(count);
         this_ptr->do_read();
     });
 }
 
 void session_t::do_write() {
-    int count = std::min(m_messages_queue.size(), 100ul);
+    auto count = std::min(m_messages_queue.size(), 100ul);
 
-    switch (m_writer_type) {
-        case network_t::writer_type::json: {
+    switch (m_protocol) {
+        case network_t::protocol::json: {
             rapidjson::StringBuffer buffer;
             rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
             writer.StartArray();
@@ -89,7 +98,7 @@ void session_t::do_write() {
             m_write_buffer = std::string(buffer.GetString(), buffer.GetSize());
             break;
         }
-        case network_t::writer_type::binary: {
+        case network_t::protocol::binary: {
             break;
         }
     }

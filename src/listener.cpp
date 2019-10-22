@@ -3,10 +3,10 @@
 #include "session.hpp"
 #include "core.hpp"
 
-listener_t::listener_t(boost::asio::io_context& io, std::shared_ptr<messages_receiver_t> messages_receiver, const boost::asio::ip::tcp::endpoint& endpoint, network_t::writer_type writer) :
+listener_t::listener_t(boost::asio::io_context& io, std::shared_ptr<messages_receiver_t> messages_receiver, const boost::asio::ip::tcp::endpoint& endpoint, network_t::protocol protocol) :
     m_io(io),
     m_messages_receiver(messages_receiver),
-    m_writer_type(writer),
+    m_protocol(protocol),
     m_acceptor(m_io)
 {
     boost::beast::error_code err;
@@ -44,7 +44,7 @@ void listener_t::do_accept() {
         if (err) {
             std::cout << "Error listener accept: " << err.message() << std::endl;
         } else {
-            std::make_shared<session_t>(this_ptr->m_io, this_ptr->m_messages_receiver, std::move(socket), this_ptr->m_writer_type)->run();
+            std::make_shared<session_t>(this_ptr->m_io, this_ptr->m_messages_receiver, std::move(socket), this_ptr->m_protocol)->run();
         }
         this_ptr->do_accept();
     });

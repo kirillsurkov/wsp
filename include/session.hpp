@@ -19,7 +19,7 @@ private:
 
     boost::beast::websocket::stream<boost::beast::tcp_stream> m_ws;
 
-    network_t::writer_type m_writer_type;
+    network_t::protocol m_protocol;
 
     boost::beast::flat_buffer m_buffer;
 
@@ -32,13 +32,15 @@ private:
     std::deque<std::shared_ptr<message::out::message_t>> m_messages_queue;
 
     message::in::type get_message_type(const rapidjson::Value& json) const;
+    message::in::type get_message_type(const void* buffer) const;
     void process_message(const rapidjson::Value& json);
+    void process_message(const void* buffer);
 
     void do_read();
     void do_write();
 
 public:
-    session_t(boost::asio::io_context& io, std::shared_ptr<messages_receiver_t> messages_receiver, boost::asio::ip::tcp::socket&& socket, network_t::writer_type writer);
+    session_t(boost::asio::io_context& io, std::shared_ptr<messages_receiver_t> messages_receiver, boost::asio::ip::tcp::socket&& socket, network_t::protocol protocol);
     ~session_t();
 
     void send_message(std::shared_ptr<message::out::message_t> message);
