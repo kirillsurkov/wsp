@@ -33,6 +33,7 @@ function GameController(game, time_step) {
                 console.log("processing frame " + game.get_frame());
                 switch (action.type) {
                     case Action.body_create: {
+                        update_world = false;
                         let oimo_types = [];
                         let oimo_sizes = [];
                         let oimo_shape_positions = [];
@@ -45,7 +46,10 @@ function GameController(game, time_step) {
                                 oimo_shape_positions.push(x);
                             }
                         }
-                        bodies[action.data.id] = world.add({type: oimo_types, move: action.data.moving, size: oimo_sizes, pos: action.data.position, posShape: oimo_shape_positions, allowSleep: false});
+                        bodies[action.data.id] = world.add({type: oimo_types, move: action.data.moving, size: oimo_sizes, pos: action.data.position, posShape: oimo_shape_positions});
+                        if (action.data.id == 12) {
+                            console.log(bodies[action.data.id]);
+                        }
                         let shapes = [];
                         for (let shape = bodies[action.data.id].shapes, shape_i = oimo_types.length - 1; shape != null; shape = shape.next, shape_i--) {
                             shapes.unshift({type: oimo_types[shape_i], position: shape.relativePosition, size: action.data.shapes[shape_i].size});
@@ -64,6 +68,7 @@ function GameController(game, time_step) {
                                 console.log("BODY " + state.id + " IS UNDEFINED");
                                 continue;
                             }
+                            body.sleeping = state.sleeping;
                             body.position.set(state.position[0], state.position[1], state.position[2]);
                             body.orientation.set(state.rotation[0], state.rotation[1], state.rotation[2], state.rotation[3]);
                             body.linearVelocity.set(state.linear_speed[0], state.linear_speed[1], state.linear_speed[2]);
@@ -87,7 +92,7 @@ function GameController(game, time_step) {
                 let body = bodies[id];
                 let obj = game.objects[id];
                 obj.position = body.position;
-                obj.rotation = body.quaternion;
+                obj.rotation = body.orientation;
                 obj.linear_speed = body.linearVelocity;
                 obj.angular_speed = body.angularVelocity;
             }

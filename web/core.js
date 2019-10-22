@@ -7,7 +7,8 @@ function start_game(server_ip, player_name) {
     let game = new Game(player_name);
     let game_renderer = new GameRenderer(game, WIDTH, HEIGHT);
     let game_controller = new GameController(game, time_step);
-    let game_networking = new GameNetworking(game);
+    console.log(Protocol);
+    let game_networking = new GameNetworking(game, Protocol.binary);
     game_networking.connect(server_ip);
     document.getElementsByTagName("body")[0].append(game_renderer.dom);
 

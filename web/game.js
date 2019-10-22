@@ -23,8 +23,8 @@ function Game(player_name) {
                 frame++;
             }
         },
-        push_packet: (type, data) => {
-            packets.push({type: type, data: data});
+        push_packet: (packet) => {
+            packets.push(packet);
         },
         clear_packets: () => {
             packets = [];
