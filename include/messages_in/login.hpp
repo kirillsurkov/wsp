@@ -8,7 +8,10 @@ namespace message::in {
         std::string m_name;
 
     public:
-        login_t(const rapidjson::Value& json);
+        static std::shared_ptr<login_t> create(const rapidjson::Value& json);
+        static std::shared_ptr<login_t> create(binary_data_t& data);
+
+        login_t(const std::string& name);
         virtual ~login_t() override;
 
         const std::string& get_name() const;

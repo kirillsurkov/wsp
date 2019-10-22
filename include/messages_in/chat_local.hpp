@@ -8,7 +8,10 @@ namespace message::in {
         std::string m_text;
 
     public:
-        chat_local_t(const rapidjson::Value& json);
+        static std::shared_ptr<chat_local_t> create(const rapidjson::Value& json);
+        static std::shared_ptr<chat_local_t> create(binary_data_t& data);
+
+        chat_local_t(const std::string& text);
         virtual ~chat_local_t() override;
 
         const std::string& get_text() const;

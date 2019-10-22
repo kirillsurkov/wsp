@@ -1,6 +1,9 @@
 #pragma once
 
+#include <memory>
 #include <rapidjson/document.h>
+
+#include "binary_data.hpp"
 
 namespace message::in {
     enum class type {
