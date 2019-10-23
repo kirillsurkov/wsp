@@ -1,5 +1,5 @@
 #include "precompiled.hpp"
-#include "physics_oimo.hpp"
+#include "physics_engines/physics_oimo.hpp"
 
 #include <rapidjson/writer.h>
 
