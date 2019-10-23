@@ -24,7 +24,8 @@ namespace message::out {
         message_t(message::out::type type, int frame);
         virtual ~message_t();
 
-        void write_message(rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
+        void write(rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
+        void write() const;
 
         std::string to_string() const;
     };

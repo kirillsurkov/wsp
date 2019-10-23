@@ -2,7 +2,7 @@
 #include "network.hpp"
 #include "listener.hpp"
 
-network_t::network_t(std::shared_ptr<messages_receiver_t> messages_receiver, int port, int threads, network_t::protocol protocol) :
+network_t::network_t(std::shared_ptr<messages_receiver_t> messages_receiver, int port, int threads, const messages_io_t& messages_io) :
     m_threads(threads),
     m_io(m_threads)
 {
@@ -10,7 +10,7 @@ network_t::network_t(std::shared_ptr<messages_receiver_t> messages_receiver, int
         m_io,
         messages_receiver,
         boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address("0.0.0.0"), port),
-        protocol
+        messages_io
     );
     listener->run();
 }

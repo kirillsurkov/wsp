@@ -6,9 +6,8 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 
-#include "network.hpp"
-#include "messages_in.hpp"
-#include "messages_out.hpp"
+#include "messages_receiver.hpp"
+#include "messages_io.hpp"
 
 class session_t : public std::enable_shared_from_this<session_t> {
 private:
@@ -19,11 +18,11 @@ private:
 
     boost::beast::websocket::stream<boost::beast::tcp_stream> m_ws;
 
-    network_t::protocol m_protocol;
+    const messages_io_t& m_messages_io;
 
     boost::beast::flat_buffer m_buffer;
 
-    std::string m_write_buffer;
+    std::vector<unsigned char> m_write_buffer;
 
     int m_player;
 
@@ -37,7 +36,7 @@ private:
     void do_write();
 
 public:
-    session_t(boost::asio::io_context& io, std::shared_ptr<messages_receiver_t> messages_receiver, boost::asio::ip::tcp::socket&& socket, network_t::protocol protocol);
+    session_t(boost::asio::io_context& io, std::shared_ptr<messages_receiver_t> messages_receiver, boost::asio::ip::tcp::socket&& socket, const messages_io_t& messages_io);
     ~session_t();
 
     void send_message(std::shared_ptr<message::out::message_t> message);

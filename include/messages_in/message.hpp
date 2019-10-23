@@ -5,6 +5,8 @@
 
 #include "binary_data.hpp"
 
+#define MESSAGES_IN (login)(delta_state)(chat_local)(chat_global)
+
 namespace message::in {
     enum class type {
         login = 1,
