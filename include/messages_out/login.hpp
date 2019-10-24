@@ -9,6 +9,7 @@ namespace message::out {
 
     protected:
         virtual void write_data(rapidjson::Writer<rapidjson::StringBuffer>& writer) const override;
+        virtual void write_data(binary_writer_t& writer) const override;
 
     public:
         login_t(int frame);

@@ -10,6 +10,7 @@ namespace message::out {
 
     protected:
         virtual void write_data(rapidjson::Writer<rapidjson::StringBuffer>& writer) const override;
+        virtual void write_data(binary_writer_t& writer) const override;
 
     public:
         body_create_t(int frame, const physics_object_t::body_t& body);

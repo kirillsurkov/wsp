@@ -12,6 +12,7 @@ namespace message::out {
 
     protected:
         virtual void write_data(rapidjson::Writer<rapidjson::StringBuffer>& writer) const override;
+        virtual void write_data(binary_writer_t& writer) const override;
 
     public:
         body_state_t(int frame, const std::unordered_map<int, physics_object_t::body_state_t>& state);

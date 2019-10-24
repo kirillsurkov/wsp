@@ -10,9 +10,6 @@ message::out::message_t::message_t(message::out::type type, int frame) :
 message::out::message_t::~message_t() {
 }
 
-void message::out::message_t::write_data(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
-}
-
 void message::out::message_t::write(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
     writer.StartObject();
     writer.String("type");
@@ -26,11 +23,8 @@ void message::out::message_t::write(rapidjson::Writer<rapidjson::StringBuffer>& 
     writer.EndObject();
 }
 
-std::string message::out::message_t::to_string() const {
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-
-    write(writer);
-
-    return buffer.GetString();
+void message::out::message_t::write(binary_writer_t& writer) const {
+    writer.write_uint8(static_cast<unsigned char>(m_type));
+    writer.write_uint32(m_frame);
+    write_data(writer);
 }

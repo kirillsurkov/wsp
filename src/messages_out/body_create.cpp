@@ -66,3 +66,36 @@ void message::out::body_create_t::write_data(rapidjson::Writer<rapidjson::String
     }
     writer.EndArray();
 }
+
+void message::out::body_create_t::write_data(binary_writer_t& writer) const {
+    const auto& position = m_body.get_state().position;
+    const auto& rotation = m_body.get_state().rotation;
+    const auto& rotation_factor = m_body.get_rotation_factor();
+    const auto& shapes = m_body.get_shapes();
+    writer.write_uint16(static_cast<unsigned short>(m_body.get_id()));
+    writer.write_uint8(m_body.is_moving());
+    writer.write_float32(position.x);
+    writer.write_float32(position.y);
+    writer.write_float32(position.z);
+    writer.write_float32(rotation.x);
+    writer.write_float32(rotation.y);
+    writer.write_float32(rotation.z);
+    writer.write_float32(rotation.w);
+    writer.write_float32(rotation_factor.x);
+    writer.write_float32(rotation_factor.y);
+    writer.write_float32(rotation_factor.z);
+    writer.write_uint8(static_cast<unsigned char>(shapes.size()));
+    for (const auto& shape : shapes) {
+        writer.write_uint8(static_cast<unsigned char>(shape->type));
+        writer.write_float32(shape->position.x);
+        writer.write_float32(shape->position.y);
+        writer.write_float32(shape->position.z);
+        writer.write_float32(shape->rotation.x);
+        writer.write_float32(shape->rotation.y);
+        writer.write_float32(shape->rotation.z);
+        writer.write_float32(shape->rotation.w);
+        writer.write_float32(shape->size.x);
+        writer.write_float32(shape->size.y);
+        writer.write_float32(shape->size.z);
+    }
+}

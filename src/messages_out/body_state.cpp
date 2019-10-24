@@ -16,9 +16,9 @@ message::out::body_state_t::~body_state_t() {
 void message::out::body_state_t::write_data(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
     writer.String("objects");
     writer.StartArray();
-    for (auto& pair : m_state) {
-        auto& id = pair.first;
-        auto& state = pair.second;
+    for (const auto& pair : m_state) {
+        auto id = pair.first;
+        const auto& state = pair.second;
         writer.StartObject();
         writer.String("id");
         writer.Int(id);
@@ -52,4 +52,27 @@ void message::out::body_state_t::write_data(rapidjson::Writer<rapidjson::StringB
         writer.EndObject();
     }
     writer.EndArray();
+}
+
+void message::out::body_state_t::write_data(binary_writer_t& writer) const {
+    writer.write_uint32(static_cast<unsigned int>(m_state.size()));
+    for (const auto& pair : m_state) {
+        auto id = pair.first;
+        const auto& state = pair.second;
+        writer.write_uint16(static_cast<unsigned short>(id));
+        writer.write_uint8(state.sleeping);
+        writer.write_float32(state.position.x);
+        writer.write_float32(state.position.y);
+        writer.write_float32(state.position.z);
+        writer.write_float32(state.rotation.x);
+        writer.write_float32(state.rotation.y);
+        writer.write_float32(state.rotation.z);
+        writer.write_float32(state.rotation.w);
+        writer.write_float32(state.linear_speed.x);
+        writer.write_float32(state.linear_speed.y);
+        writer.write_float32(state.linear_speed.z);
+        writer.write_float32(state.angular_speed.x);
+        writer.write_float32(state.angular_speed.y);
+        writer.write_float32(state.angular_speed.z);
+    }
 }
