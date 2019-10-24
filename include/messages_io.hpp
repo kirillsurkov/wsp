@@ -10,6 +10,7 @@
 #include "messages_in/message.hpp"
 #include "messages_out.hpp"
 #include "messages_out/message.hpp"
+#include "binary_writer.hpp"
 
 #define CREATE_MESSAGE_MACRO(r, data, msg) \
     case message::in::type::msg: { \
@@ -39,6 +40,6 @@ public:
     messages_io_t();
     virtual ~messages_io_t();
 
-    virtual void read(const unsigned char* in, unsigned int in_size, std::vector<std::shared_ptr<message::in::message_t>>& out) const = 0;
-    virtual unsigned int write(const std::deque<std::shared_ptr<message::out::message_t>>& in, std::vector<unsigned char>& out) const = 0;
+    virtual void read(binary_reader_t& in, std::vector<std::shared_ptr<message::in::message_t>>& out) const = 0;
+    virtual unsigned int write(const std::deque<std::shared_ptr<message::out::message_t>>& in, binary_writer_t& out) const = 0;
 };

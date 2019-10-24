@@ -7,7 +7,7 @@ namespace message::in {
     class delta_state_t : public message_t {
     public:
         static std::shared_ptr<delta_state_t> create(const rapidjson::Value& json);
-        static std::shared_ptr<delta_state_t> create(binary_data_t& data);
+        static std::shared_ptr<delta_state_t> create(binary_reader_t& reader);
 
         delta_state_t();
         virtual ~delta_state_t() override;

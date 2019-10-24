@@ -7,6 +7,6 @@ public:
     io_binary_t();
     virtual ~io_binary_t() override;
 
-    virtual void read(const unsigned char* in, unsigned int in_size, std::vector<std::shared_ptr<message::in::message_t>>& out) const override;
-    virtual unsigned int write(const std::deque<std::shared_ptr<message::out::message_t>>& in, std::vector<unsigned char>& out) const override;
+    virtual void read(binary_reader_t& in, std::vector<std::shared_ptr<message::in::message_t>>& out) const override;
+    virtual unsigned int write(const std::deque<std::shared_ptr<message::out::message_t>>& in, binary_writer_t& out) const override;
 };

@@ -3,7 +3,7 @@
 #include <memory>
 #include <rapidjson/document.h>
 
-#include "binary_data.hpp"
+#include "binary_reader.hpp"
 
 #define MESSAGES_IN (login)(delta_state)(chat_local)(chat_global)
 

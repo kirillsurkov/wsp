@@ -5,7 +5,7 @@ std::shared_ptr<message::in::delta_state_t> message::in::delta_state_t::create(c
     return std::make_shared<delta_state_t>();
 }
 
-std::shared_ptr<message::in::delta_state_t> message::in::delta_state_t::create(binary_data_t& data) {
+std::shared_ptr<message::in::delta_state_t> message::in::delta_state_t::create(binary_reader_t& reader) {
     return std::make_shared<delta_state_t>();
 }
 

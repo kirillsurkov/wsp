@@ -9,8 +9,8 @@ std::shared_ptr<message::in::login_t> message::in::login_t::create(const rapidjs
     return std::make_shared<message::in::login_t>(name_doc.GetString());
 }
 
-std::shared_ptr<message::in::login_t> message::in::login_t::create(binary_data_t& data) {
-    return std::make_shared<message::in::login_t>(data.get_string());
+std::shared_ptr<message::in::login_t> message::in::login_t::create(binary_reader_t& reader) {
+    return std::make_shared<message::in::login_t>(reader.read_string());
 }
 
 message::in::login_t::login_t(const std::string& name) :

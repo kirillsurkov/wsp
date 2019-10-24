@@ -9,7 +9,7 @@ namespace message::in {
 
     public:
         static std::shared_ptr<login_t> create(const rapidjson::Value& json);
-        static std::shared_ptr<login_t> create(binary_data_t& data);
+        static std::shared_ptr<login_t> create(binary_reader_t& reader);
 
         login_t(const std::string& name);
         virtual ~login_t() override;
