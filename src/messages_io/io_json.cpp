@@ -7,10 +7,10 @@ io_json_t::io_json_t() {
 io_json_t::~io_json_t() {
 }
 
-void io_json_t::read(const unsigned char* in, unsigned int in_size, std::vector<std::shared_ptr<message::in::message_t>>& out) const {
+void io_json_t::read(binary_reader_t& in, std::vector<std::shared_ptr<message::in::message_t>>& out) const {
     out.clear();
     rapidjson::Document json;
-    if (json.Parse(std::string(reinterpret_cast<const char*>(in), in_size).c_str()).GetParseError() != rapidjson::kParseErrorNone || !json.IsArray()) {
+    if (json.Parse(std::string(reinterpret_cast<const char*>(in.get_buffer()), in.get_size()).c_str()).GetParseError() != rapidjson::kParseErrorNone || !json.IsArray()) {
         throw std::runtime_error("Bad json");
     }
     for (auto it = json.Begin(); it != json.End(); it++) {
@@ -30,8 +30,8 @@ void io_json_t::read(const unsigned char* in, unsigned int in_size, std::vector<
     }
 }
 
-unsigned int io_json_t::write(const std::deque<std::shared_ptr<message::out::message_t>>& in, std::vector<unsigned char>& out) const {
-    auto count = std::min(in.size(), 100ul);
+unsigned int io_json_t::write(const std::deque<std::shared_ptr<message::out::message_t>>& in, binary_writer_t& out) const {
+    auto count = static_cast<unsigned int>(std::min(in.size(), 100ul));
 
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -40,10 +40,7 @@ unsigned int io_json_t::write(const std::deque<std::shared_ptr<message::out::mes
         (*it)->write(writer);
     }
     writer.EndArray();
-
-    const auto* begin = reinterpret_cast<const unsigned char*>(buffer.GetString());
-    const auto* end = begin + buffer.GetSize();
-    out = std::vector<unsigned char>(begin, end);
+    out.write(reinterpret_cast<const unsigned char*>(buffer.GetString()), buffer.GetSize());
 
     return count;
 }

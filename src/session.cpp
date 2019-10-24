@@ -10,6 +10,7 @@ session_t::session_t(boost::asio::io_context& io, std::shared_ptr<messages_recei
     m_player(0),
     m_connected(false)
 {
+    m_ws.binary(true);
 }
 
 session_t::~session_t() {
@@ -26,29 +27,40 @@ void session_t::process_message(const std::shared_ptr<message::in::message_t>& m
 
 void session_t::do_read() {
     auto this_ptr = shared_from_this();
-    m_ws.async_read(m_buffer, [this_ptr](boost::beast::error_code err, std::size_t size) {
+    m_ws.async_read(m_read_buffer, [this_ptr](boost::beast::error_code err, std::size_t size) {
         if (err) {
+            LOG << "sesion_t::do_read error: " << err.message();
             this_ptr->m_connected = false;
             this_ptr->m_messages_receiver->on_disconnect(this_ptr);
             return;
         }
+        binary_reader_t reader(reinterpret_cast<unsigned char*>(this_ptr->m_read_buffer.data().data()), size);
         std::vector<std::shared_ptr<message::in::message_t>> parsed_messages;
-        this_ptr->m_messages_io.read(reinterpret_cast<unsigned char*>(this_ptr->m_buffer.data().data()), size, parsed_messages);
+        try {
+            this_ptr->m_messages_io.read(reader, parsed_messages);
+        } catch (const std::exception& e) {
+            LOG << e.what();
+        }
+
         for (const auto& message : parsed_messages) {
             this_ptr->process_message(message);
         }
 
-        this_ptr->m_buffer.consume(size);
+        this_ptr->m_read_buffer.consume(size);
         this_ptr->do_read();
     });
 }
 
 void session_t::do_write() {
-    auto count = m_messages_io.write(m_messages_queue, m_write_buffer);
+    if (!m_connected) {
+        return;
+    }
+    m_write_buffer = std::make_shared<binary_writer_t>();
+    auto count = m_messages_io.write(m_messages_queue, *m_write_buffer);
     auto this_ptr = shared_from_this();
-    m_ws.async_write(boost::asio::buffer(m_write_buffer), m_strand.wrap([this_ptr, count](boost::beast::error_code err, std::size_t) {
+    m_ws.async_write(boost::asio::buffer(m_write_buffer->get_buffer()), m_strand.wrap([this_ptr, count](boost::beast::error_code err, std::size_t) {
         if (err) {
-            std::cout << "Error " << err.message() << std::endl;
+            std::cout << "session_t::do_write error: " << err.message() << std::endl;
         } else {
             this_ptr->m_messages_queue.erase(this_ptr->m_messages_queue.begin(), this_ptr->m_messages_queue.begin() + count);
         }

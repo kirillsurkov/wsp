@@ -20,9 +20,8 @@ private:
 
     const messages_io_t& m_messages_io;
 
-    boost::beast::flat_buffer m_buffer;
-
-    std::vector<unsigned char> m_write_buffer;
+    boost::beast::flat_buffer m_read_buffer;
+    std::shared_ptr<binary_writer_t> m_write_buffer;
 
     int m_player;
 
