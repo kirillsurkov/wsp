@@ -14,7 +14,7 @@ int main() {
     v8_platform_t v8_platform;
     auto physics = std::make_shared<physics_oimo_t>(v8_platform.create_isolate(), TIME_STEP);
     auto core = std::make_shared<core_t>(physics, TIME_STEP);
-    io_json_t messages_io;
+    io_binary_t messages_io;
     auto network = std::make_shared<network_t>(core, PORT, THREADS, messages_io);
     network->run();
     network->wait();
