@@ -19,12 +19,12 @@ protected:
     T_builders_map& m_builders;
 
 public:
+    receiver_base_t(T_builders_map& builders) : m_builders(builders) {}
+    virtual void create() {}
+    virtual ~receiver_base_t() {}
+
     void on_message() = delete;
 
-    receiver_base_t(T_builders_map& builders) :
-        m_builders(builders)
-    {}
-    virtual ~receiver_base_t() {}
     virtual void on_disconnect(std::shared_ptr<session_t>& session) = 0;
 };
 
@@ -38,7 +38,8 @@ public:
     {
     }
 
-    void create() {
+    virtual void create() override {
+        receiver_base_t<T_builders_map, Ts...>::create();
         this->m_builders.emplace(T0::id, std::make_shared<typename T0::builder_t>());
     }
 

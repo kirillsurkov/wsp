@@ -7,8 +7,6 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 
-#include "message/receiver.hpp"
-
 #include "engine/utils/log.hpp"
 
 namespace engine::network {

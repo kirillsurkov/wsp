@@ -4,9 +4,9 @@
 #include <functional>
 #include <unordered_map>
 
-//#include "engine/physics/physics.hpp"
 #include "network/session_beast.hpp"
-#include "network/message/receiver.hpp"
+
+#include "engine/physics/physics.hpp"
 
 namespace engine {
 template <class T_messages_receiver, template<class> class T_protocol>
@@ -18,14 +18,16 @@ public:
 
 private:
     std::shared_ptr<T_messages_receiver> m_messages_receiver;
+    std::shared_ptr<engine::physics_t> m_physics;
 
 protected:
     void set_messages_receiver(std::shared_ptr<T_messages_receiver> messages_receiver) {
         m_messages_receiver = messages_receiver;
     }
 
-    /*void set_physics(std::shared_ptr<engine::physics_t> physics) {
-    }*/
+    void set_physics(std::shared_ptr<engine::physics_t> physics) {
+        m_physics = physics;
+    }
 
 public:
     virtual ~game_t() {
@@ -35,6 +37,10 @@ public:
 
     std::shared_ptr<T_messages_receiver>& get_messages_receiver() {
         return m_messages_receiver;
+    }
+
+    std::shared_ptr<engine::physics_t>& get_physics() {
+        return m_physics;
     }
 };
 }

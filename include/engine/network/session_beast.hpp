@@ -1,6 +1,13 @@
 #pragma once
 
+#include <deque>
+
+#include <boost/asio/strand.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/websocket/stream.hpp>
+
 #include "session.hpp"
+
 #include "engine/utils/log.hpp"
 #include "engine/utils/binary_reader.hpp"
 

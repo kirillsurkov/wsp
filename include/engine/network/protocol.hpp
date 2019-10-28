@@ -9,8 +9,7 @@
 #include "engine/network/message/client.hpp"
 #include "engine/network/message/server.hpp"
 
-#include "engine/utils/binary_reader.hpp"
-#include "engine/utils/binary_writer.hpp"
+#include "engine/utils/log.hpp"
 
 namespace engine::network {
 template <class T_messages_receiver>

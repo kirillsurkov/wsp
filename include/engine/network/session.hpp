@@ -1,14 +1,8 @@
 #pragma once
 
-#include <deque>
-
-#include <boost/asio/strand.hpp>
-#include <boost/beast/core.hpp>
-#include <boost/beast/websocket.hpp>
+#include <memory>
 
 #include "message/server.hpp"
-
-#include "engine/utils/log.hpp"
 
 namespace engine::network {
 class session_t : public std::enable_shared_from_this<session_t> {
