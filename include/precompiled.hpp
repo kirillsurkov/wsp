@@ -15,6 +15,4 @@
 
 #include <rapidjson/document.h>
 
-#include "log.hpp"
-
-#define LOG log_t()
+#include "engine/utils/log.hpp"
